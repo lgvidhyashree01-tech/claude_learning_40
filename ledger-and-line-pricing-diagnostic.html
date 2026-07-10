@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ledger & Line — Pricing Diagnostic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1B2B22;
+    --paper:#E9ECE1;
+    --paper-white:#F7F8F2;
+    --green-deep:#1F4D3A;
+    --green-mid:#2F6B4F;
+    --green-pale:#D9E2D6;
+    --brass:#B08D3F;
+    --brass-light:#D4B96A;
+    --wax:#A13D2D;
+    --line: rgba(27,43,34,0.16);
+    --line-strong: rgba(27,43,34,0.28);
+    --shadow: 0 10px 30px rgba(27,43,34,0.10), 0 2px 8px rgba(27,43,34,0.06);
+    --radius: 6px;
+    --serif: 'Fraunces', Georgia, serif;
+    --sans: 'IBM Plex Sans', system-ui, sans-serif;
+    --mono: 'IBM Plex Mono', 'SF Mono', monospace;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    line-height:1.5;
+    min-height:100vh;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px);
+    background-size: 100% 2.1rem;
+    background-position: 0 5.4rem;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+  }
+
+  a{color:var(--green-deep);}
+
+  /* ---------- Header ---------- */
+  header.top{
+    padding: 2rem 1.5rem 1.25rem;
+    max-width: 1180px;
+    margin: 0 auto;
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:1rem;
+    flex-wrap:wrap;
+    border-bottom: 2px solid var(--ink);
+  }
+  .wordmark{
+    font-family:var(--serif);
+    font-weight:600;
+    font-size: 2rem;
+    letter-spacing: -0.01em;
+    color:var(--green-deep);
+    display:flex;
+    align-items:baseline;
+    gap:0.5rem;
+  }
+  .wordmark small{
+    font-family:var(--mono);
+    font-size:0.62rem;
+    font-weight:500;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--brass);
+    background:var(--paper-white);
+    border:1px solid var(--line-strong);
+    padding: 0.25rem 0.5rem;
+    border-radius: 3px;
+    transform: translateY(-4px);
+  }
+  .tagline{
+    font-family:var(--mono);
+    font-size:0.8rem;
+    color: rgba(27,43,34,0.65);
+    max-width: 320px;
+    text-align:right;
+  }
+
+  /* ---------- Layout ---------- */
+  main{
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+    display:grid;
+    grid-template-columns: minmax(320px, 420px) 1fr;
+    gap: 2rem;
+    align-items:start;
+  }
+  @media (max-width: 900px){
+    main{ grid-template-columns: 1fr; }
+  }
+
+  /* ---------- Ledger form panel ---------- */
+  .ledger{
+    background: var(--paper-white);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    position:relative;
+    overflow:hidden;
+  }
+  .ledger::before{
+    content:"";
+    position:absolute;
+    top:0; bottom:0; left: 2.6rem;
+    width:1px;
+    background: rgba(161,61,45,0.35);
+    pointer-events:none;
+  }
+  .ledger-head{
+    padding: 1.4rem 1.5rem 1rem 3.4rem;
+    border-bottom: 1px dashed var(--line-strong);
+  }
+  .ledger-head h2{
+    font-family:var(--serif);
+    font-size:1.25rem;
+    margin:0 0 0.2rem;
+    color:var(--green-deep);
+  }
+  .ledger-head p{
+    margin:0;
+    font-size:0.85rem;
+    color: rgba(27,43,34,0.6);
+  }
+  .ledger-body{
+    padding: 1.25rem 1.5rem 1.5rem 3.4rem;
+    display:flex;
+    flex-direction:column;
+    gap:1.15rem;
+  }
+
+  .field label{
+    display:flex;
+    align-items:baseline;
+    gap:0.4rem;
+    font-family:var(--mono);
+    font-size:0.72rem;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    color:var(--green-deep);
+    margin-bottom:0.4rem;
+  }
+  .field label .opt{
+    font-family:var(--sans);
+    text-transform:none;
+    letter-spacing:0;
+    font-size:0.72rem;
+    color: rgba(27,43,34,0.4);
+  }
+  .field input[type="text"],
+  .field textarea,
+  .field select{
+    width:100%;
+    font-family:var(--sans);
+    font-size:0.92rem;
+    color:var(--ink);
+    background:var(--paper);
+    border:1px solid var(--line-strong);
+    border-radius:4px;
+    padding:0.6rem 0.7rem;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .field textarea{ resize:vertical; min-height:4.2rem; font-family:var(--sans);}
+  .field input:focus,
+  .field textarea:focus,
+  .field select:focus{
+    outline:none;
+    border-color:var(--green-deep);
+    box-shadow: 0 0 0 3px rgba(31,77,58,0.16);
+  }
+  .row2{ display:grid; grid-template-columns:1fr 1fr; gap:0.9rem; }
+  @media (max-width:480px){ .row2{grid-template-columns:1fr;} }
+
+  .checks{
+    display:flex;
+    flex-wrap:wrap;
+    gap:0.5rem;
+  }
+  .chip{
+    font-family:var(--mono);
+    font-size:0.74rem;
+    border:1px solid var(--line-strong);
+    background:var(--paper);
+    padding:0.4rem 0.65rem;
+    border-radius:20px;
+    cursor:pointer;
+    user-select:none;
+    transition: all 0.15s ease;
+    color: rgba(27,43,34,0.75);
+  }
+  .chip input{ display:none; }
+  .chip.active{
+    background:var(--green-deep);
+    border-color:var(--green-deep);
+    color:var(--paper-white);
+  }
+  .chip:focus-within{
+    box-shadow: 0 0 0 3px rgba(31,77,58,0.2);
+  }
+
+  .submit-row{
+    margin-top:0.4rem;
+    display:flex;
+    align-items:center;
+    gap:0.9rem;
+  }
+  button.run{
+    font-family:var(--mono);
+    font-size:0.82rem;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    background:var(--green-deep);
+    color:var(--paper-white);
+    border:none;
+    padding:0.75rem 1.3rem;
+    border-radius:4px;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:0.5rem;
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+  button.run:hover{ background:#173e2f; }
+  button.run:active{ transform: translateY(1px); }
+  button.run:disabled{ opacity:0.6; cursor:progress; }
+  button.run:focus-visible{ outline:2px solid var(--brass); outline-offset:2px; }
+  .req-note{
+    font-size:0.75rem;
+    color: rgba(27,43,34,0.5);
+  }
+
+  /* ---------- Report panel ---------- */
+  .report-wrap{
+    background:var(--paper-white);
+    border:1px solid var(--line-strong);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    min-height: 420px;
+    position:relative;
+    overflow:hidden;
+  }
+  .report-inner{
+    padding: 1.75rem 2rem 2.25rem;
+    position:relative;
+  }
+
+  /* empty state */
+  .empty{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    min-height:420px;
+    padding: 2rem;
+    color: rgba(27,43,34,0.55);
+    gap:0.9rem;
+  }
+  .empty svg{ width:64px; height:64px; opacity:0.5; }
+  .empty h3{
+    font-family:var(--serif);
+    font-size:1.15rem;
+    color:var(--green-deep);
+    margin:0;
+  }
+  .empty p{ margin:0; font-size:0.9rem; max-width:340px; }
+
+  /* loading */
+  .loading{
+    min-height:420px;
+    padding: 2rem 2.25rem;
+    display:flex;
+    flex-direction:column;
+    gap:0.9rem;
+  }
+  .loading .tally{
+    font-family:var(--mono);
+    font-size:0.8rem;
+    color:var(--brass);
+    letter-spacing:0.04em;
+    margin-bottom:0.6rem;
+    display:flex;
+    align-items:center;
+    gap:0.5rem;
+  }
+  .dot-flash{ display:inline-flex; gap:3px; }
+  .dot-flash span{
+    width:5px; height:5px; border-radius:50%;
+    background:var(--brass);
+    animation: flash 1.1s infinite ease-in-out;
+  }
+  .dot-flash span:nth-child(2){ animation-delay:0.15s; }
+  .dot-flash span:nth-child(3){ animation-delay:0.3s; }
+  @keyframes flash{ 0%,80%,100%{opacity:0.2;} 40%{opacity:1;} }
+
+  .skel-line{
+    height:0.85rem;
+    border-radius:3px;
+    background: linear-gradient(90deg, var(--paper) 25%, var(--green-pale) 37%, var(--paper) 63%);
+    background-size: 400% 100%;
+    animation: shimmer 1.6s ease infinite;
+  }
+  @keyframes shimmer{ 0%{background-position:100% 0;} 100%{background-position:0 0;} }
+  .skel-line.w60{ width:60%; }
+  .skel-line.w80{ width:80%; }
+  .skel-line.w40{ width:40%; }
+  .skel-line.w95{ width:95%; }
+  .skel-block{ display:flex; flex-direction:column; gap:0.55rem; margin-bottom:1.3rem; }
+
+  /* error */
+  .error-box{
+    margin: 2rem;
+    padding: 1.25rem 1.4rem;
+    background: #FBEEEC;
+    border: 1px solid rgba(161,61,45,0.35);
+    border-left: 4px solid var(--wax);
+    border-radius:4px;
+    color: #6E2A1F;
+  }
+  .error-box h3{
+    margin:0 0 0.35rem;
+    font-family:var(--serif);
+    font-size:1.05rem;
+    color:var(--wax);
+  }
+  .error-box p{ margin:0 0 0.9rem; font-size:0.88rem; }
+  .retry-btn{
+    font-family:var(--mono);
+    font-size:0.78rem;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    background:var(--wax);
+    color:#fff;
+    border:none;
+    padding:0.55rem 1rem;
+    border-radius:4px;
+    cursor:pointer;
+  }
+  .retry-btn:hover{ background:#8a3225; }
+
+  /* stamp */
+  .stamp{
+    position:absolute;
+    top: 1.5rem;
+    right: 2rem;
+    font-family:var(--mono);
+    font-size:0.62rem;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--brass);
+    border:2px solid var(--brass);
+    border-radius:50%;
+    width:96px;
+    height:96px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    line-height:1.25;
+    transform: rotate(-9deg) scale(0);
+    opacity:0;
+    padding:0.4rem;
+    background: rgba(212,185,106,0.05);
+  }
+  .stamp.show{
+    animation: stampIn 0.5s cubic-bezier(.2,1.4,.5,1) forwards;
+  }
+  @keyframes stampIn{
+    0%{ transform: rotate(-9deg) scale(2); opacity:0; }
+    60%{ transform: rotate(-9deg) scale(0.92); opacity:1; }
+    100%{ transform: rotate(-9deg) scale(1); opacity:1; }
+  }
+
+  /* report content */
+  .report h2{
+    font-family:var(--serif);
+    font-size:1.2rem;
+    color:var(--green-deep);
+    margin: 1.6rem 0 0.6rem;
+    padding-bottom:0.35rem;
+    border-bottom: 1px solid var(--line-strong);
+  }
+  .report h2:first-child{ margin-top:0; }
+  .report h3{
+    font-family:var(--sans);
+    font-size:0.95rem;
+    font-weight:600;
+    color:var(--ink);
+    margin:1rem 0 0.3rem;
+  }
+  .report p{ margin:0 0 0.7rem; font-size:0.94rem; }
+  .report ul{ margin:0 0 0.9rem; padding-left:1.2rem; }
+  .report li{ margin-bottom:0.5rem; font-size:0.94rem; }
+  .report strong{ color:var(--green-deep); }
+  .report .meta-line{
+    font-family:var(--mono);
+    font-size:0.72rem;
+    color: rgba(27,43,34,0.45);
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    margin-bottom:0.4rem;
+  }
+
+  /* ---------- Docs panel ---------- */
+  .docs{
+    max-width:1180px;
+    margin: 0 auto 3rem;
+    padding: 0 1.5rem;
+  }
+  .docs-toggle{
+    width:100%;
+    text-align:left;
+    background:var(--paper-white);
+    border:1px solid var(--line-strong);
+    border-radius:var(--radius);
+    padding:1rem 1.3rem;
+    font-family:var(--mono);
+    font-size:0.8rem;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    color:var(--green-deep);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .docs-toggle:hover{ background:var(--green-pale); }
+  .docs-toggle .chevron{
+    transition: transform 0.2s ease;
+    font-size:0.9rem;
+  }
+  .docs-toggle.open .chevron{ transform: rotate(180deg); }
+  .docs-content{
+    max-height:0;
+    overflow:hidden;
+    transition: max-height 0.35s ease;
+    background:var(--paper-white);
+    border:1px solid var(--line-strong);
+    border-top:none;
+    border-radius: 0 0 var(--radius) var(--radius);
+  }
+  .docs-content.open{ max-height: 2400px; }
+  .docs-inner{ padding: 1.5rem 1.6rem 1.8rem; }
+  .docs-inner h4{
+    font-family:var(--serif);
+    color:var(--green-deep);
+    font-size:1.02rem;
+    margin: 1.2rem 0 0.4rem;
+  }
+  .docs-inner h4:first-child{ margin-top:0; }
+  .docs-inner p, .docs-inner li{ font-size:0.88rem; color: rgba(27,43,34,0.85); }
+  .docs-inner ul{ padding-left:1.2rem; }
+  .docs-inner code{
+    font-family:var(--mono);
+    background:var(--paper);
+    padding:0.1rem 0.35rem;
+    border-radius:3px;
+    font-size:0.82rem;
+  }
+
+  footer.foot{
+    text-align:center;
+    font-family:var(--mono);
+    font-size:0.72rem;
+    color: rgba(27,43,34,0.4);
+    padding: 1rem 0 2.5rem;
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wordmark">Ledger &amp; Line <small>Pricing Diagnostic</small></div>
+  <div class="tagline">A structured second opinion on what your price is actually saying — and what to fix first.</div>
+</header>
+
+<main>
+  <!-- FORM -->
+  <section class="ledger">
+    <div class="ledger-head">
+      <h2>Intake sheet</h2>
+      <p>Fill in what you know. Blank fields are fine — they tell us something too.</p>
+    </div>
+    <form class="ledger-body" id="intakeForm">
+
+      <div class="row2">
+        <div class="field">
+          <label for="industry">Industry</label>
+          <select id="industry">
+            <option value="">Select one</option>
+            <option>Retail / eCommerce</option>
+            <option>SaaS / Software</option>
+            <option>Professional services</option>
+            <option>Food & beverage</option>
+            <option>Health & wellness</option>
+            <option>Manufacturing</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="stage">Business stage</label>
+          <select id="stage">
+            <option value="">Select one</option>
+            <option>Pre-revenue</option>
+            <option>Early revenue (under 1 year)</option>
+            <option>Growing (1–3 years)</option>
+            <option>Established (3+ years)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="desc">What you sell <span class="opt">— required</span></label>
+        <textarea id="desc" placeholder="e.g. A monthly subscription box of small-batch coffee for home brewers"></textarea>
+      </div>
+
+      <div class="row2">
+        <div class="field">
+          <label for="price">Current price <span class="opt">— required</span></label>
+          <input type="text" id="price" placeholder="e.g. $32/month">
+        </div>
+        <div class="field">
+          <label for="cost">Cost per unit / COGS</label>
+          <input type="text" id="cost" placeholder="e.g. $14/box">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="customer">Target customer</label>
+        <input type="text" id="customer" placeholder="e.g. Home baristas, 30–50, disposable income">
+      </div>
+
+      <div class="field">
+        <label for="competitors">Main competitors &amp; their pricing</label>
+        <textarea id="competitors" placeholder="e.g. Trade Coffee $22/mo, Atlas Coffee $28/mo"></textarea>
+      </div>
+
+      <div class="field">
+        <label for="volume">Monthly revenue or customer count <span class="opt">— optional</span></label>
+        <input type="text" id="volume" placeholder="e.g. 340 subscribers, ~$10,800/mo">
+      </div>
+
+      <div class="field">
+        <label for="pain">Biggest pricing pain point</label>
+        <textarea id="pain" placeholder="e.g. Customers churn after 2 months, or I feel like I'm leaving money on the table"></textarea>
+      </div>
+
+      <div class="field">
+        <label>Business goals <span class="opt">— pick any that apply</span></label>
+        <div class="checks" id="goalChips">
+          <label class="chip"><input type="checkbox" value="Increase margin">Increase margin</label>
+          <label class="chip"><input type="checkbox" value="Grow customer volume">Grow customer volume</label>
+          <label class="chip"><input type="checkbox" value="Move upmarket">Move upmarket</label>
+          <label class="chip"><input type="checkbox" value="Simplify pricing">Simplify pricing</label>
+          <label class="chip"><input type="checkbox" value="Compete on value, not price">Compete on value, not price</label>
+        </div>
+      </div>
+
+      <div class="submit-row">
+        <button type="submit" class="run" id="runBtn">Run diagnostic</button>
+        <span class="req-note">Needs at least what you sell + current price</span>
+      </div>
+    </form>
+  </section>
+
+  <!-- REPORT -->
+  <section class="report-wrap">
+    <div class="report-inner" id="reportArea">
+      <div class="empty" id="emptyState">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+          <path d="M6 3h9l3 3v15H6z"/>
+          <path d="M15 3v3h3"/>
+          <path d="M9 10h6M9 13h6M9 16h3"/>
+        </svg>
+        <h3>Your diagnostic will appear here</h3>
+        <p>Fill in the intake sheet and run the diagnostic — you'll get a verdict, the issues driving it, and a prioritized fix list.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="docs">
+  <button class="docs-toggle" id="docsToggle">
+    <span>How this was built</span>
+    <span class="chevron">▾</span>
+  </button>
+  <div class="docs-content" id="docsContent">
+    <div class="docs-inner">
+      <h4>System prompt design</h4>
+      <p>The assistant is scoped tightly to one job: diagnosing pricing and business-model problems from structured intake data, then handing back a fixed report shape (<code>Executive Snapshot → Diagnosis → Issues Found → Recommendations → Next Step</code>). Locking the section headers in the system prompt keeps the output parseable and consistent regardless of what the owner types in.</p>
+      <p>Two guardrails matter most here: grounding and honesty about gaps. The prompt explicitly forbids inventing competitor data or market stats that weren't provided, and instructs the model to name missing numbers rather than paper over them — a pricing tool that quietly guesses at your COGS is worse than useless. It also has a sparse-input fallback: if the form is mostly empty, the assistant says so and asks for the two or three data points it actually needs, instead of hallucinating a full report from a product description alone.</p>
+      <p>Scope is enforced with a redirect rule for off-topic requests, and there's a standing disclaimer that this isn't legal, tax, or accounting advice — appropriate for a strategy tool that touches real pricing decisions.</p>
+
+      <h4>UI decisions</h4>
+      <p>The visual language borrows from a bookkeeper's ledger rather than a generic dashboard: a sage-paper background with faint ruled lines, a red margin rule down the intake form (like columnar accounting paper), brass and wax-red accents for emphasis, and a serif/mono type pairing (Fraunces for headers, IBM Plex Mono for labels and figures) that reads like a financial document rather than a SaaS product.</p>
+      <p>The signature moment is the rubber-stamp element that lands on the report once the diagnostic completes — a small, decisive flourish that matches the "verdict" nature of the output without turning into a gimmick. Loading state uses a shimmering ledger-line skeleton instead of a spinner, so the wait still feels like "the numbers are being tallied" rather than a generic load.</p>
+      <p>The form itself mirrors what a real pricing consultant would ask in an intake call — industry, stage, price, cost, competitor pricing, pain point, goals — so filling it in doubles as a useful exercise even before the report comes back.</p>
+
+      <h4>Future extensions</h4>
+      <ul>
+        <li><strong>Tools:</strong> a live web-search tool to pull current competitor pricing automatically instead of relying on the owner's manual entry, and a margin-calculator tool the model can call to check its own arithmetic before stating a recommended price.</li>
+        <li><strong>Memory:</strong> store each diagnostic per business so returning owners can compare this quarter's report to last quarter's, and the assistant can flag whether previous recommendations were acted on.</li>
+        <li><strong>Multi-step workflows:</strong> turn this into a short back-and-forth — the assistant asks one clarifying follow-up before finalizing the report, or offers to draft the actual customer-facing pricing page copy once a recommendation is accepted. A/B test design (two price points, a hypothesis, and a success metric) would be a natural next output.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<footer class="foot">Ledger &amp; Line — a pricing diagnostic, not legal, tax, or accounting advice.</footer>
+
+<script>
+  const SYSTEM_PROMPT = `You are Ledger & Line, a pricing and business-model strategist built to help small and medium-sized business owners understand what is actually wrong with their pricing and what to do about it.
+
+ROLE AND SCOPE
+- Your sole job is to diagnose pricing and business-model problems from the structured information a business owner provides, and to give clear, prioritized, actionable fixes.
+- You are consultative and professional: confident, specific, and grounded in the numbers you're given. You are not a cheerleader and you are not harsh — you sound like an experienced pricing consultant who respects the owner's time.
+- You only discuss pricing strategy, business model, packaging, positioning, margins, and related commercial topics. If asked something outside this scope (legal, tax, unrelated coding help, personal advice, etc.), politely redirect back to pricing topics instead of answering it.
+
+INPUT YOU WILL RECEIVE
+Structured fields from an intake form: industry, business stage, product/service description, current price(s), cost per unit / COGS, target customer, main competitors and their pricing, monthly revenue or customer volume (optional), the owner's stated biggest pricing pain point, and business goals. Some fields may be blank or vague — treat missing data as a signal, not a blocker.
+
+WHAT TO PRODUCE
+Always respond in this exact structured report format, using these Markdown headers exactly:
+
+## Executive Snapshot
+2-3 sentences giving the headline verdict: what's fundamentally right or wrong with their pricing, in plain language.
+
+## Diagnosis
+4-6 sentences or bullets connecting costs, price, competitors, and target customer. Name the underlying pattern (e.g. cost-plus pricing with no value anchor, race-to-the-bottom vs. competitors, underpricing relative to perceived value, no segmentation) rather than just restating their numbers.
+
+## Issues Found
+A prioritized list (most costly/urgent first) of 3-5 specific problems. Each item: a bolded short label, then 1-2 sentences of explanation, referencing their actual numbers/competitors where possible.
+
+## Recommendations
+A prioritized action list of 3-5 concrete fixes, ordered by impact vs. effort. Each item: a bolded action title, the reasoning behind it, and where useful a concrete suggestion (a specific price point, packaging idea, or segment to target).
+
+## Next Step
+One sentence: the single next thing to do this week.
+
+RULES
+- Ground every claim in what the owner actually gave you. If a cost or price is missing, say so explicitly and explain why it matters rather than inventing a number.
+- Never fabricate competitor data, market sizes, or statistics that weren't provided. Flag assumptions clearly as assumptions.
+- Be specific: prefer "raise your price from $40 to $55–60" over "consider raising your price."
+- Do not give legal, tax, or accounting advice; note where a professional should confirm compliance or tax implications.
+- Keep the whole report readable in under two minutes — dense, not padded. No filler like "pricing is important."
+- If the input is too sparse to diagnose anything meaningfully, say so plainly in the Executive Snapshot and ask for the two or three specific data points you'd need instead of guessing.
+- If the request is abusive, nonsensical, or entirely unrelated to pricing/business strategy, respond with a brief, polite redirect back to pricing topics.`;
+
+  const form = document.getElementById('intakeForm');
+  const runBtn = document.getElementById('runBtn');
+  const reportArea = document.getElementById('reportArea');
+  const docsToggle = document.getElementById('docsToggle');
+  const docsContent = document.getElementById('docsContent');
+
+  // chip toggle styling
+  document.querySelectorAll('.chip input').forEach(cb => {
+    cb.addEventListener('change', () => {
+      cb.closest('.chip').classList.toggle('active', cb.checked);
+    });
+  });
+
+  docsToggle.addEventListener('click', () => {
+    const open = docsContent.classList.toggle('open');
+    docsToggle.classList.toggle('open', open);
+  });
+
+  function esc(s){
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // very small markdown-lite renderer for the fixed report shape
+  function renderMarkdown(text){
+    const lines = text.split('\n');
+    let html = '';
+    let inList = false;
+
+    const closeList = () => { if(inList){ html += '</ul>'; inList = false; } };
+    const inlineFormat = (line) => {
+      let out = esc(line);
+      out = out.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      return out;
+    };
+
+    for (let raw of lines){
+      const line = raw.trim();
+      if (line === ''){ continue; }
+      if (line.startsWith('## ')){
+        closeList();
+        html += `<h2>${inlineFormat(line.slice(3))}</h2>`;
+      } else if (line.startsWith('### ')){
+        closeList();
+        html += `<h3>${inlineFormat(line.slice(4))}</h3>`;
+      } else if (/^[-*]\s+/.test(line)){
+        if (!inList){ html += '<ul>'; inList = true; }
+        html += `<li>${inlineFormat(line.replace(/^[-*]\s+/, ''))}</li>`;
+      } else {
+        closeList();
+        html += `<p>${inlineFormat(line)}</p>`;
+      }
+    }
+    closeList();
+    return html;
+  }
+
+  function showEmpty(){
+    reportArea.innerHTML = `
+      <div class="empty" id="emptyState">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+          <path d="M6 3h9l3 3v15H6z"/>
+          <path d="M15 3v3h3"/>
+          <path d="M9 10h6M9 13h6M9 16h3"/>
+        </svg>
+        <h3>Your diagnostic will appear here</h3>
+        <p>Fill in the intake sheet and run the diagnostic — you'll get a verdict, the issues driving it, and a prioritized fix list.</p>
+      </div>`;
+  }
+
+  function showLoading(){
+    reportArea.innerHTML = `
+      <div class="loading">
+        <div class="tally">Tallying the numbers <span class="dot-flash"><span></span><span></span><span></span></span></div>
+        <div class="skel-block">
+          <div class="skel-line w40"></div>
+          <div class="skel-line w95"></div>
+          <div class="skel-line w80"></div>
+        </div>
+        <div class="skel-block">
+          <div class="skel-line w40"></div>
+          <div class="skel-line w95"></div>
+          <div class="skel-line w95"></div>
+          <div class="skel-line w60"></div>
+        </div>
+        <div class="skel-block">
+          <div class="skel-line w40"></div>
+          <div class="skel-line w80"></div>
+          <div class="skel-line w95"></div>
+        </div>
+      </div>`;
+  }
+
+  function showError(message, onRetry){
+    reportArea.innerHTML = '';
+    const box = document.createElement('div');
+    box.className = 'error-box';
+    box.innerHTML = `
+      <h3>The numbers didn't come through</h3>
+      <p>${esc(message)}</p>
+    `;
+    const btn = document.createElement('button');
+    btn.className = 'retry-btn';
+    btn.textContent = 'Try again';
+    btn.addEventListener('click', onRetry);
+    box.appendChild(btn);
+    reportArea.appendChild(box);
+  }
+
+  function showReport(markdownText){
+    const today = new Date().toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' });
+    reportArea.innerHTML = `
+      <div class="stamp" id="stamp">DIAGNOSTIC<br>COMPLETE<br>${today}</div>
+      <div class="report">
+        <div class="meta-line">Prepared ${today}</div>
+        ${renderMarkdown(markdownText)}
+      </div>
+    `;
+    requestAnimationFrame(() => {
+      document.getElementById('stamp').classList.add('show');
+    });
+  }
+
+  function buildUserMessage(){
+    const industry = document.getElementById('industry').value || 'Not specified';
+    const stage = document.getElementById('stage').value || 'Not specified';
+    const desc = document.getElementById('desc').value.trim() || 'Not specified';
+    const price = document.getElementById('price').value.trim() || 'Not specified';
+    const cost = document.getElementById('cost').value.trim() || 'Not specified';
+    const customer = document.getElementById('customer').value.trim() || 'Not specified';
+    const competitors = document.getElementById('competitors').value.trim() || 'Not specified';
+    const volume = document.getElementById('volume').value.trim() || 'Not specified';
+    const pain = document.getElementById('pain').value.trim() || 'Not specified';
+    const goals = Array.from(document.querySelectorAll('#goalChips input:checked')).map(c => c.value);
+    const goalsText = goals.length ? goals.join(', ') : 'Not specified';
+
+    return `Here is my business intake information:
+
+Industry: ${industry}
+Business stage: ${stage}
+What I sell: ${desc}
+Current price(s): ${price}
+Cost per unit / COGS: ${cost}
+Target customer: ${customer}
+Main competitors & their pricing: ${competitors}
+Monthly revenue or customer count: ${volume}
+Biggest pricing pain point: ${pain}
+Business goals: ${goalsText}
+
+Please give me my pricing diagnostic report.`;
+  }
+
+  async function runDiagnostic(){
+    const descVal = document.getElementById('desc').value.trim();
+    const priceVal = document.getElementById('price').value.trim();
+
+    if (!descVal || !priceVal){
+      showError('The intake sheet is missing what you sell and/or your current price — those two fields are required before a diagnostic can run.', () => showEmpty());
+      document.getElementById(!descVal ? 'desc' : 'price').focus();
+      return;
+    }
+
+    runBtn.disabled = true;
+    runBtn.textContent = 'Running…';
+    showLoading();
+
+    const userMessage = buildUserMessage();
+
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 1000,
+          system: SYSTEM_PROMPT,
+          messages: [
+            { role: 'user', content: userMessage }
+          ]
+        })
+      });
+
+      if (!response.ok){
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+
+      const data = await response.json();
+      const textBlocks = (data.content || []).filter(b => b.type === 'text').map(b => b.text);
+      const fullText = textBlocks.join('\n').trim();
+
+      if (!fullText){
+        throw new Error('No report content came back.');
+      }
+
+      showReport(fullText);
+    } catch (err){
+      console.error('Diagnostic error:', err);
+      showError('Something went wrong reaching the diagnostic engine. Check your connection and try again.', () => runDiagnostic());
+    } finally {
+      runBtn.disabled = false;
+      runBtn.textContent = 'Run diagnostic';
+    }
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    runDiagnostic();
+  });
+</script>
+
+</body>
+</html>
