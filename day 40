@@ -1,0 +1,37 @@
+*What I learnt from this task:*
+1. Anyone can build their own AI assistant
+2. Ran AI Assistant Builder prompt in Claude
+3. Answered Claude's interview questions first
+4. Defined name, role, tone, and use case
+5. Got complete HTML application in one shot
+6. No API keys needed. Runs locally in browser
+7. Opened the application locally
+8. Tested my assistant with real queries
+9. It replied in the exact tone and style I set
+10. Reviewed the generated system prompt
+11. Saw how role + rules + examples shape behavior
+12. Explored the documentation panel
+13. Learned how to edit instructions and add capabilities
+14. Realized system prompts are the "source code" of AI
+15. One prompt = your own custom ChatGPT clone
+16. Product thinking + AI = you can ship tools without engineers
+
+*Tools used:*
+1. Claude AI
+2. AI Assistant Builder prompt
+3. Set effort level to Low
+4. Used for HTML app generation
+5. Solution video
+6. Watched for walkthrough and customization tips
+7. Browser
+8. Open generated HTML file locally
+9. Test assistant and review outputs
+10. Git + GitHub
+11. Created Day40 folder
+12. Created day40.md file
+13. Uploaded HTML file, system prompt, and screenshots
+14. Commit and push changes
+15. Screenshot tool
+16. Capture assistant chat UI
+17. Capture system prompt
+18. Capture documentation panel
